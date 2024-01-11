@@ -36,7 +36,7 @@ static char success = 0;
 int main (int argc, char *argv[]){
   if (isUsbAccessory() < 0) {
     if(init() < 0)
-      return;
+      return -1;
     if(setupAccessory(
                       "Poly's Factory",
                       "Android Oepn Accessory Demo",
@@ -69,9 +69,9 @@ static int mainPhase(){
   fprintf(stdout, "start main Phase\n");
   while (libusb_bulk_transfer(handle, IN, buffer, BUFFER, &transferred, 0) == 0) {
     int offset;
-    // 8•¶Žš’PˆÊ‚Å“Ç‚Ýž‚Þ
+    // 8ï¿½ï¿½ï¿½ï¿½ï¿½Pï¿½Ê‚Å“Ç‚Ýï¿½ï¿½ï¿½
     for(offset = 0; offset < transferred; offset += 8){
-      // Å‰‚Ì4•¶Žš(’[––‚ÌŒX‚«)‚ð“Ç‚Ýž‚Þ
+      // ï¿½Åï¿½ï¿½ï¿½4ï¿½ï¿½ï¿½ï¿½(ï¿½[ï¿½ï¿½ï¿½ÌŒXï¿½ï¿½)ï¿½ï¿½Ç‚Ýï¿½ï¿½ï¿½
       char tmp = buffer[offset+4];
       buffer[offset+4] = '\0';
       FILE *fp;
@@ -86,7 +86,7 @@ static int mainPhase(){
       }
       buffer[4] = tmp;
       
-      // ‘±‚­4•¶Žš(ƒ{[ƒ‹‚ª’Ç‰Á‚³‚ê‚½‚©‚Ç‚¤‚©)‚ð“Ç‚Ýž‚Þ
+      // ï¿½ï¿½ï¿½ï¿½4ï¿½ï¿½ï¿½ï¿½(ï¿½{ï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½Ç‰ï¿½ï¿½ï¿½ï¿½ê‚½ï¿½ï¿½ï¿½Ç‚ï¿½ï¿½ï¿½)ï¿½ï¿½Ç‚Ýï¿½ï¿½ï¿½
       tmp = buffer[offset+8];
       buffer[offset+8] = '\0';
       char flag[4];
@@ -110,7 +110,7 @@ static int mainPhase(){
 }
 
 static int isUsbAccessory () {
-  // ’[––‚ª‚·‚Å‚ÉUSB Accessory Mode‚©‚Ç‚¤‚©‚ð”»’è‚·‚é
+  // ï¿½[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å‚ï¿½USB Accessory Modeï¿½ï¿½ï¿½Ç‚ï¿½ï¿½ï¿½ï¿½ð”»’è‚·ï¿½ï¿½
   int res;
   libusb_init(NULL);
   if((handle = libusb_open_device_with_vid_pid(NULL, VID,  ACCESSORY_PID)) == NULL) {
@@ -154,7 +154,7 @@ static int setupAccessory(
   int response;
   int tries = 5;
 
-  // Device‚ªAndroid accessory protocol‚ðƒTƒ|[ƒg‚µ‚Ä‚¢‚é‚©”»’è‚·‚é
+  // Deviceï¿½ï¿½Android accessory protocolï¿½ï¿½ï¿½Tï¿½|ï¿½[ï¿½gï¿½ï¿½ï¿½Ä‚ï¿½ï¿½é‚©ï¿½ï¿½ï¿½è‚·ï¿½ï¿½
   response = libusb_control_transfer(
     handle, //handle
     0xC0, //bmRequestType
@@ -173,7 +173,7 @@ static int setupAccessory(
   
   usleep(1000);//sometimes hangs on the next transfer :(
 
-  // Accessory Identification‚ð‘—M‚·‚é
+  // Accessory Identificationï¿½ð‘—Mï¿½ï¿½ï¿½ï¿½
   response = libusb_control_transfer(handle,0x40,52,0,0,(char*)manufacturer,strlen(manufacturer),0);
   if(response < 0){error(response);return -1;}
   response = libusb_control_transfer(handle,0x40,52,0,1,(char*)modelName,strlen(modelName)+1,0);
@@ -189,7 +189,7 @@ static int setupAccessory(
 
   fprintf(stdout,"Accessory Identification sent\n", devVersion);
 
-  // Device‚ðAccessory mode‚É‚·‚é
+  // Deviceï¿½ï¿½Accessory modeï¿½É‚ï¿½ï¿½ï¿½
   response = libusb_control_transfer(handle,0x40,53,0,0,NULL,0,0);
   if(response < 0){error(response);return -1;}
 
@@ -212,7 +212,7 @@ static int setupAccessory(
     sleep(1);
   }
   
-  // Interface #0‚ðhandle‚É•R‚Ã‚¯‚é
+  // Interface #0ï¿½ï¿½handleï¿½É•Rï¿½Ã‚ï¿½ï¿½ï¿½
   fprintf(stdout, "claim usb accessory I/O interface\n");
   response = libusb_claim_interface(handle, 0);
   if(response < 0){error(response);return -1;}
